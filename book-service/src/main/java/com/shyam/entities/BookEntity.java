@@ -1,6 +1,6 @@
 package com.shyam.entities;
 
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
@@ -26,9 +26,10 @@ public class BookEntity {
 
     @ElementCollection
     @CollectionTable(name = "book_author_ids")
-    private List<Long> authorIds;
+    private Set<Long> authorIds;
 
     private int stock;
     private String name;
+    private String category;
     private String description;
 }
