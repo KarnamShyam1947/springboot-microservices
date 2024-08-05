@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookRequestDTO {
+public class BookRequest {
     private int stock;
     private String name;
     private String category;

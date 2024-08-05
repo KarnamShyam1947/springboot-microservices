@@ -2,6 +2,8 @@ package com.shyam.entities;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -25,6 +27,7 @@ public class BookEntity {
     private long id;
 
     @ElementCollection
+    @JsonProperty(value = "author-ids")
     @CollectionTable(name = "book_author_ids")
     private Set<Long> authorIds;
 
