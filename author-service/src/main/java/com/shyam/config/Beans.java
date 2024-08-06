@@ -1,7 +1,5 @@
 package com.shyam.config;
 
-import java.time.format.DateTimeFormatter;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -12,26 +10,19 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class Beans {
 
-    @Value("${application.service-url.author-service}")
-    private String authorServiceBaseUrl;
-    
+    @Value("${application.service-url.book-service}")
+    private String bookServiceUrl;
+
     @Bean
     ModelMapper mapper() {
         return new ModelMapper();
     }
-   
-    @Bean
-    DateTimeFormatter getFormatter() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        return formatter;
-    }
 
-    @Bean(name = "authorServiceRestTemplate")
-    RestTemplate authorRestTemplate() {
+    @Bean
+    RestTemplate restTemplate() {
         return new RestTemplateBuilder()
-                    .rootUri(authorServiceBaseUrl)
+                    .rootUri(bookServiceUrl)
                     .build();
     }
-
+    
 }
-

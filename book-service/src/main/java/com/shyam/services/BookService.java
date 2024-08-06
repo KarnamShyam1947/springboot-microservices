@@ -2,13 +2,25 @@ package com.shyam.services;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.shyam.dto.BookRequest;
 import com.shyam.dto.BookUpdateRequest;
+import com.shyam.dto.response.AuthorDTO;
+import com.shyam.dto.response.BookResponse;
 import com.shyam.entities.BookEntity;
+import com.shyam.exceptions.AuthorNotFoundException;
+import com.shyam.exceptions.BookNotFoundException;
 import com.shyam.repositories.BookRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,12 +29,33 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookService {
 
-    private final ModelMapper modelMapper;
-    private final BookRepository bookRepository;
+    @Autowired(required = true)
+    @Qualifier(value = "authorServiceRestTemplate")
+    private RestTemplate authorServiceRestTemplate;
 
-    public BookEntity addBook(BookRequest request) {
+    private final BookRepository bookRepository;
+    private final ModelMapper modelMapper;
+
+    public BookEntity addBook(BookRequest request) throws AuthorNotFoundException  {
         BookEntity book = modelMapper.map(request, BookEntity.class);
-        // TODO: check valid author or not
+
+        for (long authorId : request.getAuthorIds()) {
+            try {
+                authorServiceRestTemplate.getForEntity(
+                        "/{id}",
+                        AuthorDTO.class,
+                        authorId
+                );
+            } 
+            catch(HttpClientErrorException e) {
+                // System.out.println("\nI am here\n");
+                throw new AuthorNotFoundException();
+            }
+            catch (Exception e) {
+                System.out.println("Unknown Exception");
+            }
+
+        }
 
         return bookRepository.save(book);
     }
@@ -30,21 +63,34 @@ public class BookService {
     public List<BookEntity> getBooks() {
         return bookRepository.findAll();
     }
-    
-    public BookEntity getBook(long id) {
+
+    public BookEntity getBook(long id) throws BookNotFoundException {
         return bookRepository
                 .findById(id)
                 .orElseThrow(
-                    () -> new RuntimeException("Book Not Found")
+                    () -> new BookNotFoundException("Book Not Found with id : " + id)
                 );
     }
+    
+    public BookResponse getCompleteBookDetails(long id) throws BookNotFoundException {
+        BookEntity bookEntity = bookRepository
+                                .findById(id)
+                                .orElseThrow(
+                                    () -> new BookNotFoundException("Book Not Found with id : " + id)
+                                );
 
-    public void deleteBook(long id) {
+        BookResponse bookResponse = modelMapper.map(bookEntity, BookResponse.class);
+        bookResponse.setAuthors(getAuthorDetails(bookEntity.getAuthorIds()));
+
+        return bookResponse;
+    }
+
+    public void deleteBook(long id) throws BookNotFoundException {
         BookEntity book = getBook(id);
         bookRepository.delete(book);
     }
 
-    public BookEntity updateBook(long id, BookUpdateRequest request) {
+    public BookEntity updateBook(long id, BookUpdateRequest request) throws BookNotFoundException {
         BookEntity book = getBook(id);
 
         if (request.getName() != null) 
@@ -59,14 +105,14 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public BookEntity updateStock(long id, int stock) {
+    public BookEntity updateStock(long id, int stock) throws BookNotFoundException {
         BookEntity book = getBook(id);
         book.setStock(stock);
 
         return bookRepository.save(book);
     }
 
-    public BookEntity addAuthor(long id, long authorId){
+    public BookEntity addAuthor(long id, long authorId) throws BookNotFoundException{
         BookEntity book = getBook(id);
         Set<Long> authorIds = book.getAuthorIds();
 
@@ -75,13 +121,34 @@ public class BookService {
         return bookRepository.save(book);
     }
     
-    public BookEntity deleteAuthor(long id, long authorId){
+    public BookEntity deleteAuthor(long id, long authorId) throws BookNotFoundException{
         BookEntity book = getBook(id);
         Set<Long> authorIds = book.getAuthorIds();
 
         authorIds.remove(authorId);
 
         return bookRepository.save(book);
+    }
+
+    public List<BookEntity> getBooksByAuthorId(long authorId) {
+        return bookRepository.findBooksByAuthorId(authorId);
+    }
+
+    public List<AuthorDTO> getAuthorDetails(Set<Long> authorIds) {
+        String authorIdsParam = authorIds.stream()
+                                    .map(String::valueOf)
+                                    .collect(Collectors.joining(","));
+
+        String url = String.format("/details?author-id=%s", authorIdsParam);
+
+        ResponseEntity<List<AuthorDTO>> response = authorServiceRestTemplate.exchange(
+                                                        url,
+                                                        HttpMethod.GET,
+                                                        null,
+                                                        new ParameterizedTypeReference<List<AuthorDTO>>() {}
+                                                    );
+
+        return response.getBody();
     }
 
 }

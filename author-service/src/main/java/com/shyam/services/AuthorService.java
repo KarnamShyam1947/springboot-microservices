@@ -1,10 +1,18 @@
 package com.shyam.services;
 
+import java.util.Set;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.shyam.dto.AuthorRequest;
+import com.shyam.dto.AuthorResponse;
+import com.shyam.dto.BookResponse;
 import com.shyam.entities.AuthorEntity;
 import com.shyam.exceptions.AuthorExistsException;
 import com.shyam.exceptions.AuthorNotFoundException;
@@ -17,9 +25,10 @@ import lombok.RequiredArgsConstructor;
 public class AuthorService {
     
     private final AuthorRepository authorRepository;
+    private final RestTemplate restTemplate;
+    private final ModelMapper mapper;
 
     public AuthorEntity addAuthor(AuthorRequest request) throws AuthorExistsException {
-        //TODO: refactor with ModelMapper
 
         AuthorEntity author = authorRepository.findByName(request.getName());
         
@@ -27,18 +36,22 @@ public class AuthorService {
             throw new AuthorExistsException("Author already exists with name : " + request.getName());
         
 
-        AuthorEntity authorEntity = AuthorEntity
-                                    .builder()
-                                    .name(request.getName())
-                                    .address(request.getAddress())
-                                    .description(request.getDescription())
-                                    .build();
+        AuthorEntity authorEntity = mapper.map(author, AuthorEntity.class);
 
         return authorRepository.save(authorEntity);
     }
 
     public List<AuthorEntity> getAuthors() {
         return authorRepository.findAll();
+    }
+
+    public AuthorResponse getCompleteAuthor(long id) throws AuthorNotFoundException {
+        AuthorEntity author = getAuthor(id);
+        AuthorResponse authorResponse = mapper.map(author, AuthorResponse.class);
+
+        authorResponse.setBooks(getBooks(id));
+
+        return authorResponse;
     }
 
     public AuthorEntity getAuthor(long id) throws AuthorNotFoundException {
@@ -67,10 +80,26 @@ public class AuthorService {
     }
 
     public void deleteAuthor(long id) throws AuthorNotFoundException {
-        // TODO: delete all books of author
+        // TODO: delete all books of authora
 
         AuthorEntity author = getAuthor(id);
         authorRepository.delete(author);
+    }
+
+    public List<AuthorEntity> getAuthorDetails(Set<Long> authorIds) {
+        return authorRepository.getAuthorDetails(authorIds);
+    }
+
+    public List<BookResponse> getBooks(long id) {
+        ResponseEntity<List<BookResponse>> entity = restTemplate.exchange(
+            "/author/{id}", 
+            HttpMethod.GET,
+            null, 
+            new ParameterizedTypeReference<List<BookResponse>>() {},
+            id
+        );
+
+        return entity.getBody();
     }
 
 }

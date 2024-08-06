@@ -1,7 +1,8 @@
 package com.shyam.controllers;
 
-import java.util.List;
+import java.util.Set;
 import java.util.Map;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shyam.dto.AuthorRequest;
+import com.shyam.dto.AuthorResponse;
 import com.shyam.entities.AuthorEntity;
 import com.shyam.exceptions.AuthorExistsException;
 import com.shyam.exceptions.AuthorNotFoundException;
@@ -47,13 +50,13 @@ public class AuthorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorEntity> getAuthor(
+    public ResponseEntity<AuthorResponse> getAuthor(
         @PathVariable("id") long id
     ) throws AuthorNotFoundException {
         
         return ResponseEntity
                 .status(HttpStatus.OK.value())
-                .body(authorService.getAuthor(id));
+                .body(authorService.getCompleteAuthor(id));
     }
 
     @PutMapping("/{id}")
@@ -79,4 +82,10 @@ public class AuthorController {
                 .body(Map.of("message", "deleted successfully"));
     }
 
+    @GetMapping("/details")
+    public List<AuthorEntity> getAuthorDetails(
+        @RequestParam("author-id") Set<Long> authorIds
+    ) {
+        return authorService.getAuthorDetails(authorIds);
+    }
 }
