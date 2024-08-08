@@ -1,18 +1,15 @@
 package com.shyam.services;
 
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+// import org.springframework.web.client.RestTemplate;
 
+import com.shyam.clients.BookClient;
 import com.shyam.dto.AuthorRequest;
 import com.shyam.dto.AuthorResponse;
-import com.shyam.dto.BookResponse;
 import com.shyam.entities.AuthorEntity;
 import com.shyam.exceptions.AuthorExistsException;
 import com.shyam.exceptions.AuthorNotFoundException;
@@ -25,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthorService {
     
     private final AuthorRepository authorRepository;
-    private final RestTemplate restTemplate;
+    // private final RestTemplate restTemplate;
+    private final BookClient bookClient;
     private final ModelMapper mapper;
 
     public AuthorEntity addAuthor(AuthorRequest request) throws AuthorExistsException {
@@ -49,7 +47,7 @@ public class AuthorService {
         AuthorEntity author = getAuthor(id);
         AuthorResponse authorResponse = mapper.map(author, AuthorResponse.class);
 
-        authorResponse.setBooks(getBooks(id));
+        authorResponse.setBooks(bookClient.getBooksByAuthor(id).getBody());
 
         return authorResponse;
     }
@@ -90,16 +88,16 @@ public class AuthorService {
         return authorRepository.getAuthorDetails(authorIds);
     }
 
-    public List<BookResponse> getBooks(long id) {
-        ResponseEntity<List<BookResponse>> entity = restTemplate.exchange(
-            "/author/{id}", 
-            HttpMethod.GET,
-            null, 
-            new ParameterizedTypeReference<List<BookResponse>>() {},
-            id
-        );
+    // public List<BookResponse> getBooks(long id) {
+    //     ResponseEntity<List<BookResponse>> entity = restTemplate.exchange(
+    //         "/author/{id}", 
+    //         HttpMethod.GET,
+    //         null, 
+    //         new ParameterizedTypeReference<List<BookResponse>>() {},
+    //         id
+    //     );
 
-        return entity.getBody();
-    }
+    //     return entity.getBody();
+    // }
 
 }

@@ -2,21 +2,14 @@ package com.shyam.services;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
+import com.shyam.clients.AuthorClient;
 import com.shyam.dto.BookRequest;
 import com.shyam.dto.BookUpdateRequest;
-import com.shyam.dto.response.AuthorDTO;
 import com.shyam.dto.response.BookResponse;
 import com.shyam.entities.BookEntity;
 import com.shyam.exceptions.AuthorNotFoundException;
@@ -29,9 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookService {
 
-    @Autowired(required = true)
-    @Qualifier(value = "authorServiceRestTemplate")
-    private RestTemplate authorServiceRestTemplate;
+    private final AuthorClient authorClient;
 
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
@@ -41,15 +32,10 @@ public class BookService {
 
         for (long authorId : request.getAuthorIds()) {
             try {
-                authorServiceRestTemplate.getForEntity(
-                        "/{id}",
-                        AuthorDTO.class,
-                        authorId
-                );
+                authorClient.getAuthorDetails(authorId);
             } 
             catch(HttpClientErrorException e) {
-                // System.out.println("\nI am here\n");
-                throw new AuthorNotFoundException();
+                throw new AuthorNotFoundException("Author Not Found with id : " + authorId);
             }
             catch (Exception e) {
                 System.out.println("Unknown Exception");
@@ -80,7 +66,7 @@ public class BookService {
                                 );
 
         BookResponse bookResponse = modelMapper.map(bookEntity, BookResponse.class);
-        bookResponse.setAuthors(getAuthorDetails(bookEntity.getAuthorIds()));
+        bookResponse.setAuthors(authorClient.getAuthorDetails(bookEntity.getAuthorIds()));
 
         return bookResponse;
     }
@@ -134,21 +120,21 @@ public class BookService {
         return bookRepository.findBooksByAuthorId(authorId);
     }
 
-    public List<AuthorDTO> getAuthorDetails(Set<Long> authorIds) {
-        String authorIdsParam = authorIds.stream()
-                                    .map(String::valueOf)
-                                    .collect(Collectors.joining(","));
+    // public List<AuthorDTO> getAuthorDetails(Set<Long> authorIds) {
+    //     String authorIdsParam = authorIds.stream()
+    //                                 .map(String::valueOf)
+    //                                 .collect(Collectors.joining(","));
 
-        String url = String.format("/details?author-id=%s", authorIdsParam);
+    //     String url = String.format("/details?author-id=%s", authorIdsParam);
 
-        ResponseEntity<List<AuthorDTO>> response = authorServiceRestTemplate.exchange(
-                                                        url,
-                                                        HttpMethod.GET,
-                                                        null,
-                                                        new ParameterizedTypeReference<List<AuthorDTO>>() {}
-                                                    );
+    //     ResponseEntity<List<AuthorDTO>> response = authorServiceRestTemplate.exchange(
+    //                                                     url,
+    //                                                     HttpMethod.GET,
+    //                                                     null,
+    //                                                     new ParameterizedTypeReference<List<AuthorDTO>>() {}
+    //                                                 );
 
-        return response.getBody();
-    }
+    //     return response.getBody();
+    // }
 
 }
