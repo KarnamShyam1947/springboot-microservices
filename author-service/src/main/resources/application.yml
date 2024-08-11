@@ -16,6 +16,19 @@ spring:
         hibernate:
             ddl-auto: update
 
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8090/realms/springboot-microservices-realm
+                    jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+      
+jwt:
+    auth:
+        converter:
+            resource-id: springboot-application
+            principle-attribute: preferred_username
+
 eureka:
   client:
     fetch-registry: true

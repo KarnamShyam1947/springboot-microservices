@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.shyam.dto.ApiErrorResponse;
 import com.shyam.exceptions.AuthorExistsException;
 import com.shyam.exceptions.AuthorNotFoundException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,19 @@ public class GlobalExceptionHandler {
         errorResponse.setMessage(e.getMessage());
         errorResponse.setPath(request.getServletPath());
         errorResponse.setStatusCode(HttpStatus.CONFLICT.value());
+        
+        return ResponseEntity
+                .status(errorResponse.getStatusCode())
+                .body(errorResponse);
+    }
+    
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse();
+
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setPath(request.getServletPath());
+        errorResponse.setStatusCode(HttpStatus.FORBIDDEN.value());
         
         return ResponseEntity
                 .status(errorResponse.getStatusCode())

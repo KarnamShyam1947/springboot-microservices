@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +48,20 @@ public class BookServiceGlobalExceptionHandler {
         errorResponse.setMessage(e.getMessage());
         errorResponse.setPath(request.getServletPath());
         errorResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
+        errorResponse.setTimestamp(formatter.format(LocalDateTime.now()));
+        
+        return ResponseEntity
+                .status(errorResponse.getStatusCode())
+                .body(errorResponse);
+    }
+    
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse();
+
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setPath(request.getServletPath());
+        errorResponse.setStatusCode(HttpStatus.FORBIDDEN.value());
         errorResponse.setTimestamp(formatter.format(LocalDateTime.now()));
         
         return ResponseEntity

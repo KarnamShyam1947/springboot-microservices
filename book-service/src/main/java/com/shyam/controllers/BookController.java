@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping("/")
+    @PreAuthorize("hasRole('client_admin')")
     public ResponseEntity<BookEntity> addBook(@RequestBody BookRequest request) throws AuthorNotFoundException {
         return ResponseEntity
                 .status(HttpStatus.CREATED.value())
@@ -56,6 +58,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('client_admin')")
     public ResponseEntity<BookEntity> updateBook(
         @PathVariable("id") long id,
         @RequestBody BookUpdateRequest request
@@ -66,6 +69,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('client_admin')")
     public ResponseEntity<Map<String, String>> deleteBook(@PathVariable("id") long id) throws BookNotFoundException {
         bookService.deleteBook(id);
         return ResponseEntity
@@ -74,6 +78,7 @@ public class BookController {
     }
 
     @PostMapping("/stock")
+    @PreAuthorize("hasRole('client_admin')")
     public ResponseEntity<BookEntity> updateStock(
         @RequestBody BookStock stock
     ) throws BookNotFoundException {
