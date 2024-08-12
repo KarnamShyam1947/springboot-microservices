@@ -3,5 +3,4 @@ spring:
     import: optional:configserver:http://localhost:8088
     
   application:
-    name: book-service
-    
+    name: api-gateway
