@@ -1,53 +1,53 @@
-# spring:
-#   config:
-#     import: optional:configserver:http://localhost:8088
-
-#   application:
-#     name: author-service
-
-server:
-  port: 8082
-
 spring:
+  config:
+    import: optional:configserver:http://localhost:8088
+
   application:
     name: author-service
 
-  cloud:
-    config:
-      enabled: false
+# server:
+#   port: 8082
+
+# spring:
+#   application:
+#     name: author-service
+
+#   cloud:
+#     config:
+#       enabled: false
       
-  datasource:
-    username: admin
-    password: admin
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/sb_ms
+#   datasource:
+#     username: admin
+#     password: admin
+#     driver-class-name: org.postgresql.Driver
+#     url: jdbc:postgresql://localhost:5432/sb_ms
 
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+#   jpa:
+#     show-sql: true
+#     hibernate:
+#       ddl-auto: update
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8090/realms/springboot-microservices-realm
-          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+#   security:
+#     oauth2:
+#       resourceserver:
+#         jwt:
+#           issuer-uri: http://localhost:8090/realms/springboot-microservices-realm
+#           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
     
-jwt:
-  auth:
-    converter:
-      resource-id: springboot-application
-      principle-attribute: preferred_username
+# jwt:
+#   auth:
+#     converter:
+#       resource-id: springboot-application
+#       principle-attribute: preferred_username
 
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
+# eureka:
+#   client:
+#     fetch-registry: true
+#     register-with-eureka: true
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka
 
-management:
-  tracing:
-    sampling:
-      probability: 1    
+# management:
+#   tracing:
+#     sampling:
+#       probability: 1    
