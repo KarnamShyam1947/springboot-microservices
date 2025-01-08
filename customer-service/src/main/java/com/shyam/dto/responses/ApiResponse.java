@@ -1,17 +1,17 @@
-package com.shyam.dto;
+package com.shyam.dto.responses;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiErrorResponse {
-    
+public class ApiResponse {
+    private int status;
     private String path;
     private String message;
-    private int statusCode;
     private String timestamp;
-    
 }

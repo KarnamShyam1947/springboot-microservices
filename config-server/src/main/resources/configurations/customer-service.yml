@@ -1,0 +1,56 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: customer-service
+
+  # config:
+  #   import: optional:configserver:http://localhost:8088/
+
+  datasource:
+    username: admin
+    password: admin
+    url: jdbc:mysql://localhost:3306/sb_ms
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/springboot-microservices-realm
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  tracing:
+    sampling:
+      probability: 1
+jwt:
+  auth:
+    converter:
+      resource-id: springboot-application
+      principle-attribute: preferred_username
+
+keycloak:
+  realm: springboot-microservices-realm
+  tokenEndpoint: http://localhost:8090/realms/springboot-microservices-realm/protocol/openid-connect
+  serviceUrl: http://localhost:8090/
+  client-secret: Ft1If9mD95QsSmJQLIUO25B1v9Lr4EN4
+
+  admin:
+    client-id: admin-cli
+    
+  client:
+    client-id: springboot-application

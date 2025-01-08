@@ -3,11 +3,11 @@ package com.shyam.exceptions;
 public class InvalidUserDetailsException extends Exception {
     
     public InvalidUserDetailsException() {
-        super("Invalid user details provider");
+        super("Invalid user details provided");
     }
-    
-    public InvalidUserDetailsException(String msg) {
-        super(msg);
+
+    public InvalidUserDetailsException(String str) {
+        super(str);
     }
 
 }

@@ -3,20 +3,32 @@ package com.shyam.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+
+import com.shyam.utils.JwtAuthConverter;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+    private final JwtAuthConverter jwtAuthConverter;
+
+    
+    public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
+        this.jwtAuthConverter = jwtAuthConverter;
+    }
+
     private String[] GET_WHITE_LIST_URLs = {
         "/eureka/**",
         "/api/v1/books/**",
         "/api/v1/author/**",
-        
+        "/api/v1/auth/**"
+    };
+    
+    private String[] POST_WHITE_LIST_URLs = {
+        "/api/v1/auth/**"
     };
 
     private String[] OPTIONS_WHITE_LIST_URLs = {
@@ -35,12 +47,17 @@ public class SecurityConfig {
 
         security.csrf(csrf -> csrf.disable());
 
-        security.oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
+        security.oauth2ResourceServer(
+            oauth -> oauth.jwt(
+                jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)
+            )
+        );
 
         security.authorizeExchange(
             exchange -> exchange
                         .pathMatchers(HttpMethod.GET, GET_WHITE_LIST_URLs).permitAll()
                         .pathMatchers(HttpMethod.OPTIONS, OPTIONS_WHITE_LIST_URLs).permitAll()
+                        .pathMatchers(HttpMethod.POST, POST_WHITE_LIST_URLs).permitAll()
                         .anyExchange().authenticated()
         );
 

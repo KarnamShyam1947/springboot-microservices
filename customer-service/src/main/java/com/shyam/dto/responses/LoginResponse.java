@@ -1,4 +1,4 @@
-package com.shyam.dto;
+package com.shyam.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

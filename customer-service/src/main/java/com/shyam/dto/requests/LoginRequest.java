@@ -1,4 +1,4 @@
-package com.shyam.dto;
+package com.shyam.dto.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerDTO {
-    private String email;
-    private String lastName;
-    private String userName;
+public class LoginRequest {
+    private String username;
     private String password;
-    private String firstName;
 }

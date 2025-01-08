@@ -26,5 +26,4 @@ public class AppConfig {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return formatter;
     }
-
 }
